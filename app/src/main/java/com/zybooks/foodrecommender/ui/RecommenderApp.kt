@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -25,8 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zybooks.foodrecommender.R
 import com.zybooks.foodrecommender.ui.theme.FoodRecommenderTheme
 
@@ -65,7 +69,8 @@ fun RecipeAppBar(
 
 @Composable
 fun ListScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: RecipeViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
@@ -76,7 +81,7 @@ fun ListScreen(
         LazyColumn (
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(10) {
+            items(viewModel.recipeList) { recipe ->
             Card (
                 modifier = modifier
                     .clickable(onClick = { Unit })
@@ -99,12 +104,15 @@ fun ListScreen(
                         Modifier.weight(2f)
                     ) {
                         Text(
-                            text = "Recipe",
-                            Modifier.padding(16.dp, 0.dp)
+                            text = recipe.name,
+                            Modifier.padding(16.dp, 0.dp),
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Description",
-                            Modifier.padding(16.dp, 0.dp)
+                            text = recipe.description,
+                            Modifier.padding(16.dp, 0.dp),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     Image(

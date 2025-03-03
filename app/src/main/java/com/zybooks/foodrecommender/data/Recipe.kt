@@ -5,6 +5,7 @@ import java.net.URI
 data class Recipe (
     val id: Int = 1,
     val name: String = "",
+    val description: String = "",
     val rating: Float = 0.0f,
     val website: URI ?= null,
     val filters: Array<String> ?= null
