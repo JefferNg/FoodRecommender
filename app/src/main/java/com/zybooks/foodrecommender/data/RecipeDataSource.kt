@@ -1,7 +1,5 @@
 package com.zybooks.foodrecommender.data
 
-import androidx.compose.material3.Card
-
 class RecipeDataSource {
     private val recipeList = listOf(
         Recipe(

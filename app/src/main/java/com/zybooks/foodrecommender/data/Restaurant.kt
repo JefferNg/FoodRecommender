@@ -2,19 +2,21 @@ package com.zybooks.foodrecommender.data
 
 import java.net.URI
 
-data class Recipe (
+data class Restaurant (
     val id: Int = -1,
     val name: String = "",
-    val description: String = "",
     val rating: Float = 0.0f,
+    val location: String = "",
     val website: URI ?= null,
+    val phone: String = "tel:",
     val filters: Array<String> ?= null
+
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Recipe
+        other as Restaurant
 
         if (id != other.id) return false
         if (filters != null) {
