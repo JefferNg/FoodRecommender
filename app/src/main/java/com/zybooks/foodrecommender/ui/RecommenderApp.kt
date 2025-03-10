@@ -1,6 +1,7 @@
 package com.zybooks.foodrecommender.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,6 +19,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -25,11 +29,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zybooks.foodrecommender.R
 import com.zybooks.foodrecommender.ui.theme.FoodRecommenderTheme
@@ -231,18 +237,120 @@ fun RestaurantListScreen(
 
 }
 
-@Preview(showBackground = true)
 @Composable
-fun RecommenderPreview() {
-    FoodRecommenderTheme {
-        RecipeListScreen()
+fun HomeScreen(
+    modifier: Modifier = Modifier
+) {
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = "What are you feeling today?",
+            modifier = Modifier
+                .padding(0.dp, 20.dp)
+                .border(1.dp, Color.Black)
+                .padding(12.dp, 20.dp)
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(180.dp)
+        ) {
+            items(12) {
+                Card(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = false,
+                            onCheckedChange = { Unit }
+                        )
+                        Text(
+                            text = "Food filter"
+                        )
+                    }
+                }
+            }
+        }
+        Row (
+            modifier = Modifier
+                .padding(16.dp, 24.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Card (
+                modifier = Modifier
+                    .clickable(onClick = { Unit })
+                    .padding(8.dp, 0.dp)
+                    .weight(1f)
+            ) {
+                Row (
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.tray),
+                        contentDescription = "Hand holding tray",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Text(
+                        text = "Eat Out",
+                        modifier = Modifier.padding(8.dp, 0.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+            }
+            Card (
+                modifier = Modifier.clickable(onClick = { Unit })
+                    .padding(8.dp, 0.dp)
+                    .weight(1f)
+            ) {
+                Row (
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.home),
+                        contentDescription = "House",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Text(
+                        text = "Stay Home",
+                        modifier = Modifier.padding(8.dp, 0.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+            }
+        }
     }
 }
 
+//@Preview(showBackground = true)
+//@Composable
+//fun RecommenderPreview() {
+//    FoodRecommenderTheme {
+//        RecipeListScreen()
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun RestaurantPreview() {
+//    FoodRecommenderTheme {
+//        RestaurantListScreen()
+//    }
+//}
+
 @Preview(showBackground = true)
 @Composable
-fun RestaurantPreview() {
+fun HomePreview() {
     FoodRecommenderTheme {
-        RestaurantListScreen()
+        HomeScreen()
     }
 }
