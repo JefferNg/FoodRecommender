@@ -6,12 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,24 +39,78 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.zybooks.foodrecommender.R
+import com.zybooks.foodrecommender.data.Recipe
+import com.zybooks.foodrecommender.data.RecipeDataSource
+import com.zybooks.foodrecommender.data.Restaurant
+import com.zybooks.foodrecommender.data.RestaurantDataSource
 import com.zybooks.foodrecommender.ui.theme.FoodRecommenderTheme
+import kotlinx.serialization.Serializable
 
+sealed class Routes {
+    @Serializable
+    data object Home
+
+    @Serializable
+    data object RecipeList
+
+    @Serializable
+    data object RestaurantList
+}
+
+@Preview
 @Composable
 fun RecommenderApp(modifier: Modifier = Modifier) {
-    RecipeListScreen()
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = Routes.Home
+    ) {
+        composable<Routes.Home> {
+            HomeScreen(
+                foodFilters = listOf("Asian", "Indian", "Italian", "American", "Chicken", "Pork", "Beef", "Thai", "Vietnamese", "Chinese", "Greek", "Japanese"),
+                onRecipeListClick = { navController.navigate(Routes.RecipeList) },
+                onRestaurantListClick = { navController.navigate(Routes.RestaurantList) }
+            )
+        }
+        composable<Routes.RecipeList> {
+            RecipeListScreen(
+                RecipeDataSource().loadRecipes(),
+                onRecipeClick = {},
+                onUpClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
+        composable<Routes.RestaurantList> {
+            RestaurantListScreen(
+                RestaurantDataSource().loadRestaurants(),
+                onRestaurantClick = {},
+                onUpClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
+    }
+
+
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeAppBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onUpClick: () -> Unit = { }
 ) {
     CenterAlignedTopAppBar(
         title = { Text("Recommended Recipes") },
         navigationIcon = {
-            IconButton(onClick = { Unit }) {
+            IconButton(onClick = onUpClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back button"
@@ -76,12 +132,13 @@ fun RecipeAppBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantAppBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onUpClick: () -> Unit = { }
 ) {
     CenterAlignedTopAppBar(
         title = { Text("Recommended Restaurants") },
         navigationIcon = {
-            IconButton(onClick = { Unit }) {
+            IconButton(onClick = onUpClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back button"
@@ -102,12 +159,16 @@ fun RestaurantAppBar(
 
 @Composable
 fun RecipeListScreen(
+    recipeList: List<Recipe>,
+    onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RecipeViewModel = viewModel()
+    onUpClick: () -> Unit = { }
 ) {
     Scaffold(
         topBar = {
-            RecipeAppBar()
+            RecipeAppBar(
+                onUpClick = onUpClick
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -124,10 +185,10 @@ fun RecipeListScreen(
         LazyColumn (
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(viewModel.recipeList) { recipe ->
+            items(recipeList) { recipe ->
             Card (
                 modifier = modifier
-                    .clickable(onClick = { Unit })
+                    .clickable(onClick = { onRecipeClick(recipe) })
                     .padding(8.dp)
                     .fillMaxWidth()
             ) {
@@ -174,12 +235,16 @@ fun RecipeListScreen(
 
 @Composable
 fun RestaurantListScreen(
+    restaurantList: List<Restaurant>,
+    onRestaurantClick: (Restaurant) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RestaurantViewModel = viewModel()
+    onUpClick: () -> Unit = { }
 ) {
     Scaffold(
         topBar = {
-            RestaurantAppBar()
+            RestaurantAppBar(
+                onUpClick = onUpClick
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -196,10 +261,10 @@ fun RestaurantListScreen(
         LazyColumn (
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(viewModel.restaurantList) { restaurant ->
+            items(restaurantList) { restaurant ->
                 Card (
                     modifier = modifier
-                        .clickable(onClick = { Unit })
+                        .clickable(onClick = { onRestaurantClick(restaurant) })
                         .padding(8.dp)
                         .fillMaxWidth()
                 ) {
@@ -239,10 +304,14 @@ fun RestaurantListScreen(
 
 @Composable
 fun HomeScreen(
+    foodFilters: List<String>,
+    onRecipeListClick: (List<String>) -> Unit,
+    onRestaurantListClick: (List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxHeight()
     ) {
         Text(
             text = "What are you feeling today?",
@@ -254,7 +323,7 @@ fun HomeScreen(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(180.dp)
         ) {
-            items(12) {
+            items(foodFilters) { food ->
                 Card(
                     modifier = Modifier.padding(8.dp)
                 ) {
@@ -267,7 +336,7 @@ fun HomeScreen(
                             onCheckedChange = { Unit }
                         )
                         Text(
-                            text = "Food filter"
+                            text = food
                         )
                     }
                 }
@@ -282,7 +351,7 @@ fun HomeScreen(
         ) {
             Card (
                 modifier = Modifier
-                    .clickable(onClick = { Unit })
+                    .clickable(onClick = { onRestaurantListClick(foodFilters) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -305,7 +374,7 @@ fun HomeScreen(
                 }
             }
             Card (
-                modifier = Modifier.clickable(onClick = { Unit })
+                modifier = Modifier.clickable(onClick = { onRecipeListClick(foodFilters) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -347,10 +416,13 @@ fun HomeScreen(
 //    }
 //}
 
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    FoodRecommenderTheme {
-        HomeScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    FoodRecommenderTheme {
+//        HomeScreen(
+//            foodFilters = listOf("Asian", "Indian", "Italian", "American", "Chicken", "Pork", "Beef", "Thai", "Vietnamese", "Chinese", "Greek", "Japanese"),
+//            onLocationClick = {}
+//        )
+//    }
+//}
