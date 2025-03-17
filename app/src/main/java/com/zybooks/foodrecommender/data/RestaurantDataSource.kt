@@ -8,7 +8,7 @@ class RestaurantDataSource {
             rating = 3.7f,
             location = "San Luis Obispo",
             phone = "tel: 123-456-7890",
-            filters = arrayOf("Italian", "pasta")
+            filters = listOf("Italian", "pasta")
         ),
         Restaurant(
             id = 2,
@@ -16,7 +16,7 @@ class RestaurantDataSource {
             rating = 3.0f,
             location = "San Luis Obispo",
             phone = "tel: 123-456-7890",
-            filters = arrayOf("Chinese", "fast")
+            filters = listOf("Chinese", "fast")
         ),
         Restaurant(
             id = 3,
@@ -24,9 +24,19 @@ class RestaurantDataSource {
             rating = 4.5f,
             location = "San Luis Obispo",
             phone = "tel: 123-456-7890",
-            filters = arrayOf("American", "BBQ", "burgers", "sandwiches")
+            filters = listOf("American", "BBQ", "burgers", "sandwiches")
         ),
     )
 
     fun loadRestaurants() = restaurantList
+
+    fun getRestaurant(id: Int) : Restaurant? {
+        for (restaurant in restaurantList) {
+            if (restaurant.id == id) {
+                return restaurant
+            }
+        }
+
+        return null
+    }
 }

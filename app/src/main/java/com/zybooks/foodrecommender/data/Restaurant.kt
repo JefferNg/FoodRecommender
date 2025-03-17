@@ -9,7 +9,7 @@ data class Restaurant (
     val location: String = "",
     val website: URI ?= null,
     val phone: String = "tel:",
-    val filters: Array<String> ?= null
+    val filters: List<String> ?= null
 
 ) {
     override fun equals(other: Any?): Boolean {
@@ -19,17 +19,16 @@ data class Restaurant (
         other as Restaurant
 
         if (id != other.id) return false
-        if (filters != null) {
-            if (other.filters == null) return false
-            if (!filters.contentEquals(other.filters)) return false
-        } else if (other.filters != null) return false
+        if (name != other.name) return false
+        if (filters != other.filters) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = id
-        result = 31 * result + (filters?.contentHashCode() ?: 0)
+        result = 31 * result + name.hashCode()
+        result = 31 * result + (filters?.hashCode() ?: 0)
         return result
     }
 }
