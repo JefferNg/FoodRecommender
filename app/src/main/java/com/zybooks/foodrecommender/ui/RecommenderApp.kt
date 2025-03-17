@@ -190,7 +190,7 @@ fun RecipeListScreen(
     onUpClick: () -> Unit = { }
 ) {
     val filteredRecipes = viewModel.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters?.any { it in foodFilters } == true
+        foodFilters.isEmpty() || recipe.filters?.any { it.lowercase() in foodFilters } == true
     }
 
     Scaffold(
@@ -317,7 +317,7 @@ fun RestaurantListScreen(
     onUpClick: () -> Unit = { }
 ) {
     val filteredRestaurants = viewModel.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters?.any { it in foodFilters } == true
+        foodFilters.isEmpty() || restaurant.filters?.any { it.lowercase() in foodFilters } == true
     }
 
     Scaffold(

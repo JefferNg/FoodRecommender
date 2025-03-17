@@ -2,18 +2,18 @@ package com.zybooks.foodrecommender.data
 
 class HomeDataSource {
     private val homeFilters = listOf(
-        "Asian",
-        "Indian",
-        "Italian",
-        "American",
-        "Chicken",
-        "Pork",
-        "Beef",
-        "Thai",
-        "Vietnamese",
-        "Chinese",
-        "Greek",
-        "Japanese"
+        "asian",
+        "indian",
+        "italian",
+        "american",
+        "chicken",
+        "pork",
+        "beef",
+        "thai",
+        "vietnamese",
+        "chinese",
+        "greek",
+        "japanese"
     )
 
     fun getHomeFilters() = homeFilters
