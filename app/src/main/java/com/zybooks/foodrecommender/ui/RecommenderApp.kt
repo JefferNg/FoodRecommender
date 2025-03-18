@@ -269,10 +269,12 @@ fun RecipeListScreen(
 fun RecipeDetailScreen(
     recipeId: Long,
     modifier: Modifier = Modifier,
-    viewModel: RecipeDetailViewModel = viewModel(),
+    viewModel: RecipeDetailViewModel = viewModel(factory = RecipeDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val recipe = viewModel.getRecipe(recipeId)
+    val uiState = viewModel.uiState.collectAsState()
+
+    val recipe = uiState.value.recipe
 
     Scaffold (
         topBar = {
@@ -391,10 +393,12 @@ fun RestaurantListScreen(
 fun RestaurantDetailScreen(
     restaurantId: Long,
     modifier: Modifier = Modifier,
-    viewModel: RestaurantDetailViewModel = viewModel(),
+    viewModel: RestaurantDetailViewModel = viewModel(factory = RestaurantDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val restaurant = viewModel.getRestaurant(restaurantId)
+    val uiState = viewModel.uiState.collectAsState()
+
+    val restaurant = uiState.value.restaurant
 
     Scaffold (
         topBar = {
