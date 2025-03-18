@@ -70,12 +70,12 @@ sealed class Routes {
 
     @Serializable
     data class RecipeDetail(
-        val recipeId: Int
+        val recipeId: Long
     )
 
     @Serializable
     data class RestaurantDetail(
-        val restaurantId: Int
+        val restaurantId: Long
     )
 }
 
@@ -186,11 +186,13 @@ fun RecipeListScreen(
     foodFilters: List<String>,
     onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RecipeListViewModel = viewModel(),
+    viewModel: RecipeListViewModel = viewModel(factory = RecipeListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val filteredRecipes = viewModel.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters?.any { it.lowercase() in foodFilters } == true
+    val uiState = viewModel.uiState.collectAsState()
+
+    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
+        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters } == true
     }
 
     Scaffold(
@@ -265,7 +267,7 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeDetailScreen(
-    recipeId: Int,
+    recipeId: Long,
     modifier: Modifier = Modifier,
     viewModel: RecipeDetailViewModel = viewModel(),
     onUpClick: () -> Unit = { }
@@ -313,11 +315,13 @@ fun RestaurantListScreen(
     foodFilters: List<String>,
     onRestaurantClick: (Restaurant) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RestaurantListViewModel = viewModel(),
+    viewModel: RestaurantListViewModel = viewModel(factory = RestaurantListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val filteredRestaurants = viewModel.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters?.any { it.lowercase() in foodFilters } == true
+    val uiState = viewModel.uiState.collectAsState()
+
+    val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
+        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters } == true
     }
 
     Scaffold(
@@ -385,7 +389,7 @@ fun RestaurantListScreen(
 
 @Composable
 fun RestaurantDetailScreen(
-    restaurantId: Int,
+    restaurantId: Long,
     modifier: Modifier = Modifier,
     viewModel: RestaurantDetailViewModel = viewModel(),
     onUpClick: () -> Unit = { }

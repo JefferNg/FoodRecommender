@@ -5,5 +5,5 @@ import com.zybooks.foodrecommender.data.Recipe
 import com.zybooks.foodrecommender.data.RecipeDataSource
 
 class RecipeDetailViewModel : ViewModel() {
-    fun getRecipe(id: Int): Recipe = RecipeDataSource().getRecipe(id) ?: Recipe()
+    fun getRecipe(id: Long): Recipe = RecipeDataSource().getRecipe(id) ?: Recipe()
 }

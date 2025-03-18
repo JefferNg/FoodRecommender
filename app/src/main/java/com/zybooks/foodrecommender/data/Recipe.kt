@@ -1,15 +1,19 @@
 package com.zybooks.foodrecommender.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.net.URI
 
+@Entity
 data class Recipe (
-    val id: Int = -1,
-    val name: String = "",
-    val description: String = "",
-    val rating: Float = 0.0f,
-    val website: URI ?= null,
-    val filters: List<String> ?= null,
-    val imageId: Int = 0
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0,
+    var name: String = "",
+    var description: String = "",
+    var rating: Float = 0.0f,
+    var website: String ?= null,
+    var filters: List<String> = emptyList(),
+    var imageId: Int = 0
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -25,7 +29,7 @@ data class Recipe (
     }
 
     override fun hashCode(): Int {
-        var result = id
+        var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + (filters?.hashCode() ?: 0)
         return result
