@@ -111,11 +111,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RecipeDetail> { backstackEntry ->
-            val recipe: Routes.RecipeDetail = backstackEntry.toRoute()
-
+        composable<Routes.RecipeDetail> {
             RecipeDetailScreen(
-                recipeId = recipe.recipeId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -136,11 +133,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RestaurantDetail> { backstackEntry ->
-            val restaurant: Routes.RestaurantDetail = backstackEntry.toRoute()
-
+        composable<Routes.RestaurantDetail> {
             RestaurantDetailScreen(
-                restaurantId = restaurant.restaurantId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -267,7 +261,6 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeDetailScreen(
-    recipeId: Long,
     modifier: Modifier = Modifier,
     viewModel: RecipeDetailViewModel = viewModel(factory = RecipeDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
@@ -391,7 +384,6 @@ fun RestaurantListScreen(
 
 @Composable
 fun RestaurantDetailScreen(
-    restaurantId: Long,
     modifier: Modifier = Modifier,
     viewModel: RestaurantDetailViewModel = viewModel(factory = RestaurantDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
