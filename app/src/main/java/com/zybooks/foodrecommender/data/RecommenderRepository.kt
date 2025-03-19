@@ -12,10 +12,23 @@ import org.json.JSONObject
 
 class RecommenderRepository(context: Context, private val recipeApiService: RecipeApiService) {
     // api code
-    suspend fun getRecipesApi(ingredient: String, cuisine: String): List<Recipe> =
-        recipeApiService.getRecipesByIngredient(ingredient).meals ?:
-        recipeApiService.getRecipesByCuisine(cuisine).meals ?:
-        emptyList()
+    suspend fun getRecipesApi(ingredient: String, cuisine: String): List<Recipe> {
+        return when {
+            ingredient.isNotBlank() && cuisine.isNotBlank() -> {
+                val byIngredient = recipeApiService.getRecipesByIngredient(ingredient).meals.orEmpty()
+                val byCuisine = recipeApiService.getRecipesByCuisine(cuisine).meals.orEmpty()
+                (byIngredient + byCuisine).distinctBy { it.id }
+            }
+
+            ingredient.isNotBlank() ->
+                recipeApiService.getRecipesByIngredient(ingredient).meals.orEmpty()
+
+            cuisine.isNotBlank() ->
+                recipeApiService.getRecipesByCuisine(cuisine).meals.orEmpty()
+
+            else -> recipeApiService.getRecipesByIngredient("").meals.orEmpty()
+        }
+    }
 
     suspend fun getRecipeApi(id: Long): List<Recipe> = recipeApiService.getRecipeById(id).meals ?: emptyList()
 
