@@ -1,5 +1,8 @@
 package com.zybooks.foodrecommender.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -19,11 +22,22 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+sealed class RecipeDetailUiState {
+    data class Success(val recipe: List<Recipe>) : RecipeDetailUiState()
+    data object Error : RecipeDetailUiState()
+    data object Loading : RecipeDetailUiState()
+}
 
 class RecipeDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val repo: RecommenderRepository
 ) : ViewModel() {
+
+    var recipeUiState: RecipeDetailUiState by mutableStateOf(RecipeDetailUiState.Loading)
+        private set
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -57,5 +71,9 @@ class RecipeDetailViewModel(
         val recipe: Recipe = Recipe()
     )
 
-//    fun getRecipe(id: Long): Recipe = RecipeDataSource().getRecipe(id) ?: Recipe()
+    fun getRecipe(id: Long) {
+        viewModelScope.launch {
+            recipeUiState = RecipeDetailUiState.Success(repo.getRecipeApi(id))
+        }
+    }
 }

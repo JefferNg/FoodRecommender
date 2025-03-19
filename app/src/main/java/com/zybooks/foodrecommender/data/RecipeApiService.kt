@@ -18,4 +18,8 @@ interface RecipeApiService {
         @Query("a") cuisine: String
     ): RecipeResponse
 
+    @GET("lookup.php")
+    suspend fun getRecipeById(
+        @Query("i") id: Long
+    ): RecipeResponse
 }

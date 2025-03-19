@@ -110,8 +110,11 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RecipeDetail> {
+        composable<Routes.RecipeDetail> { backstackEntry ->
+            val recipe: Routes.RecipeDetail = backstackEntry.toRoute()
+
             RecipeDetailScreen(
+                recipeId = recipe.recipeId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -279,13 +282,23 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeDetailScreen(
+    recipeId: Long,
     modifier: Modifier = Modifier,
     viewModel: RecipeDetailViewModel = viewModel(factory = RecipeDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    val recipe = uiState.value.recipe
+//    val recipe = uiState.value.recipe
+    var recipe = Recipe()
+
+    viewModel.getRecipe(recipeId)
+
+    when (val recipeState = viewModel.recipeUiState) {
+        is RecipeDetailUiState.Loading -> Text("Loading...")
+        is RecipeDetailUiState.Error -> Text("Error")
+        is RecipeDetailUiState.Success -> recipe = recipeState.recipe.first()
+    }
 
     Scaffold (
         topBar = {

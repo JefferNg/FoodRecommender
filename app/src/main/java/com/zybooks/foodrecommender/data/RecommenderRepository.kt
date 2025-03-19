@@ -15,6 +15,8 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
         recipeApiService.getRecipesByCuisine(cuisine).meals ?:
         emptyList()
 
+    suspend fun getRecipeApi(id: Long): List<Recipe> = recipeApiService.getRecipeById(id).meals ?: emptyList()
+
     private val databaseCallback = object : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
