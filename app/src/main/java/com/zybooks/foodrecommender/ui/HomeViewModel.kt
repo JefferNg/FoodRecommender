@@ -12,10 +12,18 @@ class HomeViewModel : ViewModel() {
     val selectedFilters = selectedFiltersFlow.asStateFlow()
 
     fun selectFilters(filter: String) {
-        selectedFiltersFlow.value = if (filter in selectedFiltersFlow.value) {
-            selectedFiltersFlow.value - filter
+        selectedFiltersFlow.value = if (selectedFiltersFlow.value.contains(filter)) {
+            emptyList()
         } else {
-            selectedFiltersFlow.value + filter
+            listOf(filter)
         }
+
+
+        // Selecting multiple filters
+//        selectedFiltersFlow.value = if (filter in selectedFiltersFlow.value) {
+//            selectedFiltersFlow.value - filter
+//        } else {
+//            selectedFiltersFlow.value + filter
+//        }
     }
 }

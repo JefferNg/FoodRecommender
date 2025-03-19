@@ -58,9 +58,9 @@ class RecipeListViewModel(private val repo: RecommenderRepository) : ViewModel()
         val recipeList: List<Recipe> = emptyList()
     )
 
-    fun getRecipes() {
+    fun getRecipes(ingredient: String) {
         viewModelScope.launch {
-            recipeUiState = RecipeListUiState.Success(repo.getRecipesApi("chicken_breast"))
+            recipeUiState = RecipeListUiState.Success(repo.getRecipesApi(ingredient))
         }
     }
 }

@@ -183,18 +183,23 @@ fun RecipeListScreen(
     viewModel: RecipeListViewModel = viewModel(factory = RecipeListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
+    var recipeList: List<Recipe> = emptyList()
     val uiState = viewModel.uiState.collectAsState()
 
     val filteredRecipes = uiState.value.recipeList.filter { recipe ->
         foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
     }
 
-    viewModel.getRecipes()
+    if (foodFilters.isEmpty()) {
+        viewModel.getRecipes("")
+    } else {
+        viewModel.getRecipes(foodFilters.first())
+    }
 
     when (val recipeState = viewModel.recipeUiState) {
         is RecipeListUiState.Loading -> Text("Loading...")
         is RecipeListUiState.Error -> Text("Error")
-        is RecipeListUiState.Success -> Text(recipeState.recipeList.toString())
+        is RecipeListUiState.Success -> recipeList = recipeState.recipeList
     }
 
     Scaffold(
@@ -219,7 +224,7 @@ fun RecipeListScreen(
         LazyColumn (
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(filteredRecipes) { recipe ->
+            items(recipeList) { recipe ->
             Card (
                 modifier = modifier
                     .clickable(onClick = { onRecipeClick(recipe) })
