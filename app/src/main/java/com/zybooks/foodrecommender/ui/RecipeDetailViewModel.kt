@@ -73,7 +73,11 @@ class RecipeDetailViewModel(
 
     fun getRecipe(id: Long) {
         viewModelScope.launch {
-            recipeUiState = RecipeDetailUiState.Success(repo.getRecipeApi(id))
+            recipeUiState = try {
+                RecipeDetailUiState.Success(repo.getRecipeApi(id))
+            } catch (e: Exception) {
+                RecipeDetailUiState.Error
+            }
         }
     }
 }

@@ -207,7 +207,7 @@ fun RecipeListScreen(
 
     when (val recipeState = viewModel.recipeUiState) {
         is RecipeListUiState.Loading -> Text("Loading...")
-        is RecipeListUiState.Error -> Text("Error")
+        is RecipeListUiState.Error -> ErrorScreen()
         is RecipeListUiState.Success -> recipeList = recipeState.recipeList
     }
 
@@ -303,7 +303,7 @@ fun RecipeDetailScreen(
 
     when (val recipeState = viewModel.recipeUiState) {
         is RecipeDetailUiState.Loading -> Text("Loading...")
-        is RecipeDetailUiState.Error -> Text("Error")
+        is RecipeDetailUiState.Error -> ErrorScreen()
         is RecipeDetailUiState.Success -> recipe = recipeState.recipe.first()
     }
 
@@ -478,6 +478,23 @@ fun RestaurantDetailScreen(
             )
 
         }
+    }
+}
+
+@Composable
+fun ErrorScreen() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(R.drawable.home),
+            contentDescription = "House image",
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(text = "Error loading recipe")
+        Text(text = "Check your internet connection")
     }
 }
 
