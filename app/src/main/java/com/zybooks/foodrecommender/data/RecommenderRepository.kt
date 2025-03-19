@@ -8,7 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RecommenderRepository(context: Context) {
+class RecommenderRepository(context: Context, private val recipeApiService: RecipeApiService) {
+
+    suspend fun getRecipesApi(ingredient: String): List<Recipe> = recipeApiService.getRecipes(ingredient).meals ?: emptyList()
 
     private val databaseCallback = object : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {

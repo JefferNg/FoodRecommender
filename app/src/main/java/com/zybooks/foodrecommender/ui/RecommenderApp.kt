@@ -189,6 +189,14 @@ fun RecipeListScreen(
         foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
     }
 
+    viewModel.getRecipes()
+
+    when (val recipeState = viewModel.recipeUiState) {
+        is RecipeListUiState.Loading -> Text("Loading...")
+        is RecipeListUiState.Error -> Text("Error")
+        is RecipeListUiState.Success -> Text(recipeState.recipeList.toString())
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
