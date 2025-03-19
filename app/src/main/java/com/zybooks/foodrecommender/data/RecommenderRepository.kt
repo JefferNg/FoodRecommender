@@ -122,7 +122,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
                 rating = 3.7f,
                 location = "San Luis Obispo",
                 phone = "tel: 123-456-7890",
-                filters = listOf("Italian", "pasta")
+                filters = listOf("Italian", "pasta", "soup")
             )
         )
 
@@ -133,7 +133,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
                 rating = 3.0f,
                 location = "San Luis Obispo",
                 phone = "tel: 123-456-7890",
-                filters = listOf("Chinese", "fast")
+                filters = listOf("Chinese", "fast", "chicken", "beef", "rice")
             )
         )
 
@@ -145,6 +145,83 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
                 location = "San Luis Obispo",
                 phone = "tel: 123-456-7890",
                 filters = listOf("American", "BBQ", "burgers", "sandwiches")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 4,
+                name = "Thai Delight Cuisine",
+                rating = 3.4f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Thai", "noodles", "chicken", "beef", "tofu")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 5,
+                name = "Chipotle",
+                rating = 3.8f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Mexican", "burritos", "beans", "chicken", "beef")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 6,
+                name = "Petra Mediterranean Pizza and Grill",
+                rating = 4.3f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Mediterranean", "pizza", "gyro", "chicken", "bread")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 7,
+                name = "At Bites",
+                rating = 3.9f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Vietnamese", "pho", "banh mi", "chicken", "beef")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 8,
+                name = "Woodstock's Pizza SLO",
+                rating = 3.5f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Italian", "pizza", "chicken")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 9,
+                name = "Poke Chef",
+                rating = 4.1f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Japanese", "sushi", "fish", "rice")
+            )
+        )
+
+        restaurantDao.addRestaurant(
+            Restaurant(
+                id = 10,
+                name = "Shalimar",
+                rating = 3.0f,
+                location = "San Luis Obispo",
+                phone = "tel: 123-456-7890",
+                filters = listOf("Indian", "curry", "rice", "chicken")
             )
         )
 

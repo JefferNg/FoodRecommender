@@ -353,12 +353,20 @@ fun RestaurantListScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    var filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
-        cuisineFilter == null || restaurant.filters.any { it.lowercase() == cuisineFilter}
-    }
+    val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
+        when {
+            cuisineFilter != null && ingredientFilter != null ->
+                restaurant.filters.any { it.lowercase() == cuisineFilter } ||
+                        restaurant.filters.any { it.lowercase() == ingredientFilter }
 
-    filteredRestaurants = filteredRestaurants.filter { restaurant ->
-        ingredientFilter == null || restaurant.filters.any {it.lowercase() == ingredientFilter}
+            cuisineFilter != null ->
+                restaurant.filters.any { it.lowercase() == cuisineFilter }
+
+            ingredientFilter != null ->
+                restaurant.filters.any { it.lowercase() == ingredientFilter }
+
+            else -> true
+        }
     }
 
     Scaffold(

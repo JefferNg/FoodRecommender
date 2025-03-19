@@ -2,14 +2,14 @@ package com.zybooks.foodrecommender.data
 
 class HomeDataSource {
     private val cuisineFilters = listOf(
-        "asian",
-        "indian",
+        "mexican",
         "italian",
         "american",
         "vietnamese",
         "chinese",
-        "greek",
-        "japanese"
+        "mediterranean",
+        "japanese",
+        "thai"
     )
 
     private val ingredientFilters = listOf(
