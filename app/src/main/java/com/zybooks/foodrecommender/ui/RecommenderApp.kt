@@ -45,6 +45,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil.compose.AsyncImage
 import com.zybooks.foodrecommender.R
 import com.zybooks.foodrecommender.data.Recipe
 import com.zybooks.foodrecommender.data.Restaurant
@@ -266,9 +267,15 @@ fun RecipeListScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Image(
-                        painter = painterResource(R.drawable.image),
-                        contentDescription = "Empty image icon",
+//                    Image(
+//                        painter = painterResource(R.drawable.image),
+//                        contentDescription = "Empty image icon",
+//                        modifier = Modifier.size(40.dp)
+//                    )
+                    AsyncImage(
+                        model = recipe.imageId,
+                        error = painterResource(R.drawable.image),
+                        contentDescription = recipe.name,
                         modifier = Modifier.size(40.dp)
                     )
                 }
@@ -312,8 +319,14 @@ fun RecipeDetailScreen(
         Column (
             modifier = Modifier.padding(innerPadding)
         ) {
-            Image(
-                painter = painterResource(R.drawable.image),
+//            Image(
+//                painter = painterResource(R.drawable.image),
+//                contentDescription = recipe.name,
+//                modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp)
+//            )
+            AsyncImage(
+                model = recipe.imageId,
+                error = painterResource(R.drawable.image),
                 contentDescription = recipe.name,
                 modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp)
             )
