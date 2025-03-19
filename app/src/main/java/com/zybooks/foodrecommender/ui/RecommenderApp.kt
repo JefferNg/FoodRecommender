@@ -186,7 +186,7 @@ fun RecipeListScreen(
     val uiState = viewModel.uiState.collectAsState()
 
     val filteredRecipes = uiState.value.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters } == true
+        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
     }
 
     Scaffold(
@@ -316,7 +316,7 @@ fun RestaurantListScreen(
     val uiState = viewModel.uiState.collectAsState()
 
     val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters } == true
+        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters }
     }
 
     Scaffold(
