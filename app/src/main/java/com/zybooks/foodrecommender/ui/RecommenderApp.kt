@@ -534,12 +534,16 @@ fun HomeScreen(
     ) {
         Text(
             text = "What are you feeling today?",
+            fontSize = 24.sp,
             modifier = Modifier
                 .padding(0.dp, 20.dp)
                 .border(1.dp, Color.Black)
                 .padding(12.dp, 20.dp)
         )
-        Text(text = "Choose Cuisine (max 1)")
+        Text(
+            text = "Choose Cuisine (max 1)",
+            modifier = Modifier.padding(0.dp, 4.dp)
+        )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             modifier = Modifier.size(500.dp, 200.dp)
@@ -563,7 +567,10 @@ fun HomeScreen(
                 }
             }
         }
-        Text(text = "Choose Ingredient (max 1)")
+        Text(
+            text = "Choose Ingredient (max 1)",
+            modifier = Modifier.padding(0.dp, 4.dp)
+        )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             modifier = Modifier.size(500.dp, 200.dp)
