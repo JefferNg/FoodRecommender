@@ -9,8 +9,13 @@ data class RecipeResponse(
 
 interface RecipeApiService {
     @GET("filter.php")
-    suspend fun getRecipes(
+    suspend fun getRecipesByIngredient(
         @Query("i") ingredient: String
+    ): RecipeResponse
+
+    @GET("filter.php")
+    suspend fun getRecipesByCuisine(
+        @Query("a") cuisine: String
     ): RecipeResponse
 
 }

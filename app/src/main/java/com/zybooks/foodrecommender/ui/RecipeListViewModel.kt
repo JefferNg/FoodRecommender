@@ -11,9 +11,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.zybooks.foodrecommender.RecommenderApplication
 import com.zybooks.foodrecommender.data.Recipe
-import com.zybooks.foodrecommender.data.RecipeDataSource
 import com.zybooks.foodrecommender.data.RecommenderRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -58,9 +56,11 @@ class RecipeListViewModel(private val repo: RecommenderRepository) : ViewModel()
         val recipeList: List<Recipe> = emptyList()
     )
 
-    fun getRecipes(ingredient: String) {
+    fun getRecipes(ingredient: String, cuisine: String) {
         viewModelScope.launch {
-            recipeUiState = RecipeListUiState.Success(repo.getRecipesApi(ingredient))
+            recipeUiState = RecipeListUiState.Success(repo.getRecipesApi(
+                ingredient = ingredient,
+                cuisine = cuisine))
         }
     }
 }

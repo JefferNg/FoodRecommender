@@ -10,7 +10,10 @@ import kotlinx.coroutines.launch
 
 class RecommenderRepository(context: Context, private val recipeApiService: RecipeApiService) {
 
-    suspend fun getRecipesApi(ingredient: String): List<Recipe> = recipeApiService.getRecipes(ingredient).meals ?: emptyList()
+    suspend fun getRecipesApi(ingredient: String, cuisine: String): List<Recipe> =
+        recipeApiService.getRecipesByIngredient(ingredient).meals ?:
+        recipeApiService.getRecipesByCuisine(cuisine).meals ?:
+        emptyList()
 
     private val databaseCallback = object : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {

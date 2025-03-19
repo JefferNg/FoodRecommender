@@ -46,12 +46,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zybooks.foodrecommender.R
-import com.zybooks.foodrecommender.data.HomeDataSource
 import com.zybooks.foodrecommender.data.Recipe
-import com.zybooks.foodrecommender.data.RecipeDataSource
 import com.zybooks.foodrecommender.data.Restaurant
-import com.zybooks.foodrecommender.data.RestaurantDataSource
-import com.zybooks.foodrecommender.ui.theme.FoodRecommenderTheme
 import kotlinx.serialization.Serializable
 
 sealed class Routes {
@@ -60,12 +56,14 @@ sealed class Routes {
 
     @Serializable
     data class RecipeList(
-        val foodFilters: List<String>
+        val cuisineFilter: String?,
+        val ingredientFilter: String?
     )
 
     @Serializable
     data class RestaurantList(
-        val foodFilters: List<String>
+        val cuisineFilter: String?,
+        val ingredientFilter: String?
     )
 
     @Serializable
@@ -90,17 +88,18 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
     ) {
         composable<Routes.Home> {
             HomeScreen(
-                onRecipeListClick = { selectedFilters ->
-                    navController.navigate(Routes.RecipeList(selectedFilters)) },
-                onRestaurantListClick = { selectedFilters ->
-                    navController.navigate(Routes.RestaurantList(selectedFilters)) }
+                onRecipeListClick = { cuisineFilter, ingredientFilter ->
+                    navController.navigate(Routes.RecipeList(cuisineFilter, ingredientFilter)) },
+                onRestaurantListClick = { cuisineFilter, ingredientFilter ->
+                    navController.navigate(Routes.RestaurantList(cuisineFilter, ingredientFilter)) }
             )
         }
         composable<Routes.RecipeList> { backstackEntry ->
-            val recipes: Routes.RecipeList = backstackEntry.toRoute()
+            val filters: Routes.RecipeList = backstackEntry.toRoute()
 
             RecipeListScreen(
-                foodFilters = recipes.foodFilters,
+                cuisineFilter = filters.cuisineFilter,
+                ingredientFilter = filters.ingredientFilter,
                 onRecipeClick = { recipe ->
                     navController.navigate(
                         Routes.RecipeDetail(recipe.id)
@@ -122,7 +121,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
             val restaurants: Routes.RestaurantList = backstackEntry.toRoute()
 
             RestaurantListScreen(
-                foodFilters = restaurants.foodFilters,
+                cuisineFilter = restaurants.cuisineFilter,
+                ingredientFilter = restaurants.ingredientFilter,
                 onRestaurantClick = { restaurant ->
                     navController.navigate(
                         Routes.RestaurantDetail(restaurant.id)
@@ -177,7 +177,8 @@ fun TopAppBar(
 
 @Composable
 fun RecipeListScreen(
-    foodFilters: List<String>,
+    cuisineFilter: String?,
+    ingredientFilter: String?,
     onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RecipeListViewModel = viewModel(factory = RecipeListViewModel.Factory),
@@ -186,14 +187,18 @@ fun RecipeListScreen(
     var recipeList: List<Recipe> = emptyList()
     val uiState = viewModel.uiState.collectAsState()
 
-    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
-    }
+//    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
+//        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
+//    }
 
-    if (foodFilters.isEmpty()) {
-        viewModel.getRecipes("")
-    } else {
-        viewModel.getRecipes(foodFilters.first())
+    if (cuisineFilter == null && ingredientFilter == null) {
+        viewModel.getRecipes("", "")
+    } else if (cuisineFilter != null && ingredientFilter != null){
+        viewModel.getRecipes(ingredientFilter, cuisineFilter)
+    } else if (cuisineFilter != null) {
+        viewModel.getRecipes("", cuisineFilter)
+    } else if (ingredientFilter != null) {
+        viewModel.getRecipes(ingredientFilter, "")
     }
 
     when (val recipeState = viewModel.recipeUiState) {
@@ -320,7 +325,8 @@ fun RecipeDetailScreen(
 
 @Composable
 fun RestaurantListScreen(
-    foodFilters: List<String>,
+    cuisineFilter: String?,
+    ingredientFilter: String?,
     onRestaurantClick: (Restaurant) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RestaurantListViewModel = viewModel(factory = RestaurantListViewModel.Factory),
@@ -328,8 +334,12 @@ fun RestaurantListScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters }
+    var filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
+        cuisineFilter == null || restaurant.filters.any { it.lowercase() == cuisineFilter}
+    }
+
+    filteredRestaurants = filteredRestaurants.filter { restaurant ->
+        ingredientFilter == null || restaurant.filters.any {it.lowercase() == ingredientFilter}
     }
 
     Scaffold(
@@ -447,12 +457,13 @@ fun RestaurantDetailScreen(
 
 @Composable
 fun HomeScreen(
-    onRecipeListClick: (List<String>) -> Unit,
-    onRestaurantListClick: (List<String>) -> Unit,
+    onRecipeListClick: (String?, String?) -> Unit,
+    onRestaurantListClick: (String?, String?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val selectedFilters by viewModel.selectedFilters.collectAsState()
+    val selectedCuisine by viewModel.selectedCuisine.collectAsState()
+    val selectedIngredient by viewModel.selectedIngredient.collectAsState()
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -465,10 +476,12 @@ fun HomeScreen(
                 .border(1.dp, Color.Black)
                 .padding(12.dp, 20.dp)
         )
+        Text(text = "Choose Cuisine (max 1)")
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(180.dp)
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.size(500.dp, 200.dp)
         ) {
-            items(viewModel.foodFilters) { food ->
+            items(viewModel.cuisineFilters) { cuisine ->
                 Card(
                     modifier = Modifier.padding(8.dp)
                 ) {
@@ -477,11 +490,35 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = food in selectedFilters,
-                            onCheckedChange = { viewModel.selectFilters(food) }
+                            checked = selectedCuisine?.contains(cuisine) == true,
+                            onCheckedChange = { viewModel.selectCuisine(cuisine) }
                         )
                         Text(
-                            text = food
+                            text = cuisine
+                        )
+                    }
+                }
+            }
+        }
+        Text(text = "Choose Ingredient (max 1)")
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.size(500.dp, 200.dp)
+        ) {
+            items(viewModel.ingredientFilters) { ingredient ->
+                Card(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedIngredient?.contains(ingredient) == true,
+                            onCheckedChange = { viewModel.selectIngredient(ingredient) }
+                        )
+                        Text(
+                            text = ingredient
                         )
                     }
                 }
@@ -496,7 +533,7 @@ fun HomeScreen(
         ) {
             Card (
                 modifier = Modifier
-                    .clickable(onClick = { onRestaurantListClick(selectedFilters) })
+                    .clickable(onClick = { onRestaurantListClick(selectedCuisine, selectedIngredient) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -519,7 +556,7 @@ fun HomeScreen(
                 }
             }
             Card (
-                modifier = Modifier.clickable(onClick = { onRecipeListClick(selectedFilters) })
+                modifier = Modifier.clickable(onClick = { onRecipeListClick(selectedCuisine, selectedIngredient) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -560,16 +597,5 @@ fun HomeScreen(
 //fun RestaurantPreview() {
 //    FoodRecommenderTheme {
 //        RestaurantListScreen()
-//    }
-//}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HomePreview() {
-//    FoodRecommenderTheme {
-//        HomeScreen(
-//            foodFilters = listOf("Asian", "Indian", "Italian", "American", "Chicken", "Pork", "Beef", "Thai", "Vietnamese", "Chinese", "Greek", "Japanese"),
-//            onLocationClick = {}
-//        )
 //    }
 //}
