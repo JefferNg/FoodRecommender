@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -78,7 +80,6 @@ sealed class Routes {
     )
 }
 
-@Preview
 @Composable
 fun RecommenderApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -206,7 +207,7 @@ fun RecipeListScreen(
     }
 
     when (val recipeState = viewModel.recipeUiState) {
-        is RecipeListUiState.Loading -> Text("Loading...")
+        is RecipeListUiState.Loading -> LoadingScreen()
         is RecipeListUiState.Error -> ErrorScreen()
         is RecipeListUiState.Success -> recipeList = recipeState.recipeList
     }
@@ -302,7 +303,7 @@ fun RecipeDetailScreen(
     viewModel.getRecipe(recipeId)
 
     when (val recipeState = viewModel.recipeUiState) {
-        is RecipeDetailUiState.Loading -> Text("Loading...")
+        is RecipeDetailUiState.Loading -> LoadingScreen()
         is RecipeDetailUiState.Error -> ErrorScreen()
         is RecipeDetailUiState.Success -> recipe = recipeState.recipe.first()
     }
@@ -499,6 +500,25 @@ fun ErrorScreen() {
 }
 
 @Composable
+fun LoadingScreen() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .size(60.dp)
+        )
+        Text(
+            text = "Loading...",
+            fontSize = 30.sp,
+        )
+    }
+}
+
+@Composable
 fun HomeScreen(
     onRecipeListClick: (String?, String?) -> Unit,
     onRestaurantListClick: (String?, String?) -> Unit,
@@ -641,4 +661,9 @@ fun HomeScreen(
 //    FoodRecommenderTheme {
 //        RestaurantListScreen()
 //    }
+//}
+//@Preview(showBackground = true)
+//@Composable
+//fun ErrorPreview() {
+//    ErrorScreen()
 //}
