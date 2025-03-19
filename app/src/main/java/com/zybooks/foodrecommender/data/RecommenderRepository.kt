@@ -1,15 +1,17 @@
 package com.zybooks.foodrecommender.data
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class RecommenderRepository(context: Context, private val recipeApiService: RecipeApiService) {
-
+    // api code
     suspend fun getRecipesApi(ingredient: String, cuisine: String): List<Recipe> =
         recipeApiService.getRecipesByIngredient(ingredient).meals ?:
         recipeApiService.getRecipesByCuisine(cuisine).meals ?:
@@ -17,6 +19,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
 
     suspend fun getRecipeApi(id: Long): List<Recipe> = recipeApiService.getRecipeById(id).meals ?: emptyList()
 
+    // database code
     private val databaseCallback = object : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
@@ -87,7 +90,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
             Recipe(
                 id = 1,
                 name = "Oven Roasted Chicken Breast",
-                description = "An oven roasted chicken breast perfect for any occasion.",
+                instruction = "An oven roasted chicken breast perfect for any occasion.",
                 rating = 8.7f,
                 filters = listOf("chicken", "easy")
             ))
@@ -96,7 +99,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
             Recipe(
                 id = 2,
                 name = "Italian Sausage Pasta",
-                description = "A comfort dish served in just under 30 minutes.",
+                instruction = "A comfort dish served in just under 30 minutes.",
                 rating = 9.3f,
                 filters = listOf("pasta", "fast", "Italian", "easy", "sausage")
             )
@@ -106,7 +109,7 @@ class RecommenderRepository(context: Context, private val recipeApiService: Reci
             Recipe(
                 id = 3,
                 name = "Orange Chicken with Rice",
-                description = "A fan-favorite",
+                instruction = "A fan-favorite",
                 rating = 8.3f,
                 filters = listOf("chicken", "rice", "Asian")
             )
