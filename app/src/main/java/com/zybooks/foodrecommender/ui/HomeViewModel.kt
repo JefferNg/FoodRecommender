@@ -6,16 +6,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class HomeViewModel : ViewModel() {
-    val foodFilters = HomeDataSource().getHomeFilters()
+    val cuisineFilters = HomeDataSource().getCuisineFilters()
+    val ingredientFilters = HomeDataSource().getIngredientFilters()
 
-    private val selectedFiltersFlow = MutableStateFlow<List<String>>(emptyList())
-    val selectedFilters = selectedFiltersFlow.asStateFlow()
+    private val selectedCuisineFlow = MutableStateFlow<String?>(null)
+    private val selectedIngredientFlow = MutableStateFlow<String?>(null)
 
-    fun selectFilters(filter: String) {
-        selectedFiltersFlow.value = if (filter in selectedFiltersFlow.value) {
-            selectedFiltersFlow.value - filter
-        } else {
-            selectedFiltersFlow.value + filter
-        }
+    val selectedCuisine = selectedCuisineFlow.asStateFlow()
+    val selectedIngredient = selectedIngredientFlow.asStateFlow()
+
+    fun selectCuisine(cuisine: String) {
+        selectedCuisineFlow.value = if (selectedCuisineFlow.value == cuisine) null else cuisine
+    }
+
+    fun selectIngredient(ingredient: String) {
+        selectedIngredientFlow.value = if (selectedIngredientFlow.value == ingredient) null else ingredient
     }
 }

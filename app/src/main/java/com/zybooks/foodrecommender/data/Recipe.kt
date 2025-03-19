@@ -2,18 +2,25 @@ package com.zybooks.foodrecommender.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.net.URI
+import com.google.gson.annotations.SerializedName
 
-@Entity
+@Entity(ignoredColumns = ["ingredients", "measurements"])
 data class Recipe (
     @PrimaryKey(autoGenerate = true)
+    @SerializedName(value = "idMeal")
     var id: Long = 0,
+    @SerializedName(value = "strMeal")
     var name: String = "",
-    var description: String = "",
+    @SerializedName(value = "strInstructions")
+    var instruction: String = "",
     var rating: Float = 0.0f,
-    var website: String ?= null,
+    @SerializedName(value = "strYoutube")
+    var website: String = "",
     var filters: List<String> = emptyList(),
-    var imageId: Int = 0
+    @SerializedName(value = "strMealThumb")
+    var imageId: String = "",
+    var ingredients: List<String> = emptyList(),
+    var measurements: List<String> = emptyList()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

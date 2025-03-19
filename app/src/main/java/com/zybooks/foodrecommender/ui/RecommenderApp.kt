@@ -3,10 +3,12 @@ package com.zybooks.foodrecommender.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +17,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
@@ -22,6 +26,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,8 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,13 +48,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil.compose.AsyncImage
 import com.zybooks.foodrecommender.R
-import com.zybooks.foodrecommender.data.HomeDataSource
 import com.zybooks.foodrecommender.data.Recipe
-import com.zybooks.foodrecommender.data.RecipeDataSource
 import com.zybooks.foodrecommender.data.Restaurant
-import com.zybooks.foodrecommender.data.RestaurantDataSource
-import com.zybooks.foodrecommender.ui.theme.FoodRecommenderTheme
 import kotlinx.serialization.Serializable
 
 sealed class Routes {
@@ -60,12 +60,14 @@ sealed class Routes {
 
     @Serializable
     data class RecipeList(
-        val foodFilters: List<String>
+        val cuisineFilter: String?,
+        val ingredientFilter: String?
     )
 
     @Serializable
     data class RestaurantList(
-        val foodFilters: List<String>
+        val cuisineFilter: String?,
+        val ingredientFilter: String?
     )
 
     @Serializable
@@ -79,7 +81,6 @@ sealed class Routes {
     )
 }
 
-@Preview
 @Composable
 fun RecommenderApp(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -90,17 +91,18 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
     ) {
         composable<Routes.Home> {
             HomeScreen(
-                onRecipeListClick = { selectedFilters ->
-                    navController.navigate(Routes.RecipeList(selectedFilters)) },
-                onRestaurantListClick = { selectedFilters ->
-                    navController.navigate(Routes.RestaurantList(selectedFilters)) }
+                onRecipeListClick = { cuisineFilter, ingredientFilter ->
+                    navController.navigate(Routes.RecipeList(cuisineFilter, ingredientFilter)) },
+                onRestaurantListClick = { cuisineFilter, ingredientFilter ->
+                    navController.navigate(Routes.RestaurantList(cuisineFilter, ingredientFilter)) }
             )
         }
         composable<Routes.RecipeList> { backstackEntry ->
-            val recipes: Routes.RecipeList = backstackEntry.toRoute()
+            val filters: Routes.RecipeList = backstackEntry.toRoute()
 
             RecipeListScreen(
-                foodFilters = recipes.foodFilters,
+                cuisineFilter = filters.cuisineFilter,
+                ingredientFilter = filters.ingredientFilter,
                 onRecipeClick = { recipe ->
                     navController.navigate(
                         Routes.RecipeDetail(recipe.id)
@@ -111,8 +113,11 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RecipeDetail> {
+        composable<Routes.RecipeDetail> { backstackEntry ->
+            val recipe: Routes.RecipeDetail = backstackEntry.toRoute()
+
             RecipeDetailScreen(
+                recipeId = recipe.recipeId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -122,7 +127,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
             val restaurants: Routes.RestaurantList = backstackEntry.toRoute()
 
             RestaurantListScreen(
-                foodFilters = restaurants.foodFilters,
+                cuisineFilter = restaurants.cuisineFilter,
+                ingredientFilter = restaurants.ingredientFilter,
                 onRestaurantClick = { restaurant ->
                     navController.navigate(
                         Routes.RestaurantDetail(restaurant.id)
@@ -177,16 +183,34 @@ fun TopAppBar(
 
 @Composable
 fun RecipeListScreen(
-    foodFilters: List<String>,
+    cuisineFilter: String?,
+    ingredientFilter: String?,
     onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RecipeListViewModel = viewModel(factory = RecipeListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
+    var recipeList: List<Recipe> = emptyList()
     val uiState = viewModel.uiState.collectAsState()
 
-    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
+//    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
+//        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
+//    }
+
+    if (cuisineFilter == null && ingredientFilter == null) {
+        viewModel.getRecipes("", "")
+    } else if (cuisineFilter != null && ingredientFilter != null){
+        viewModel.getRecipes(ingredientFilter, cuisineFilter)
+    } else if (cuisineFilter != null) {
+        viewModel.getRecipes("", cuisineFilter)
+    } else if (ingredientFilter != null) {
+        viewModel.getRecipes(ingredientFilter, "")
+    }
+
+    when (val recipeState = viewModel.recipeUiState) {
+        is RecipeListUiState.Loading -> LoadingScreen()
+        is RecipeListUiState.Error -> ErrorScreen()
+        is RecipeListUiState.Success -> recipeList = recipeState.recipeList
     }
 
     Scaffold(
@@ -211,7 +235,7 @@ fun RecipeListScreen(
         LazyColumn (
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(filteredRecipes) { recipe ->
+            items(recipeList) { recipe ->
             Card (
                 modifier = modifier
                     .clickable(onClick = { onRecipeClick(recipe) })
@@ -225,11 +249,11 @@ fun RecipeListScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.user_profile),
-                        contentDescription = "User profile picture",
-                        modifier = Modifier.size(40.dp)
-                    )
+//                    Image(
+//                        painter = painterResource(R.drawable.user_profile),
+//                        contentDescription = "User profile picture",
+//                        modifier = Modifier.size(40.dp)
+//                    )
                     Column (
                         Modifier.weight(2f)
                     ) {
@@ -238,16 +262,16 @@ fun RecipeListScreen(
                             Modifier.padding(16.dp, 0.dp),
                             fontWeight = FontWeight.Bold
                         )
-                        Text(
-                            text = recipe.description,
-                            Modifier.padding(16.dp, 0.dp),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
                     }
-                    Image(
-                        painter = painterResource(R.drawable.image),
-                        contentDescription = "Empty image icon",
+//                    Image(
+//                        painter = painterResource(R.drawable.image),
+//                        contentDescription = "Empty image icon",
+//                        modifier = Modifier.size(40.dp)
+//                    )
+                    AsyncImage(
+                        model = recipe.imageId,
+                        error = painterResource(R.drawable.image),
+                        contentDescription = recipe.name,
                         modifier = Modifier.size(40.dp)
                     )
                 }
@@ -261,13 +285,23 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeDetailScreen(
+    recipeId: Long,
     modifier: Modifier = Modifier,
     viewModel: RecipeDetailViewModel = viewModel(factory = RecipeDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    val recipe = uiState.value.recipe
+//    val recipe = uiState.value.recipe
+    var recipe = Recipe()
+
+    viewModel.getRecipe(recipeId)
+
+    when (val recipeState = viewModel.recipeUiState) {
+        is RecipeDetailUiState.Loading -> LoadingScreen()
+        is RecipeDetailUiState.Error -> ErrorScreen()
+        is RecipeDetailUiState.Success -> recipe = recipeState.recipe.first()
+    }
 
     Scaffold (
         topBar = {
@@ -279,10 +313,16 @@ fun RecipeDetailScreen(
     ) {
         innerPadding ->
         Column (
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding).verticalScroll(rememberScrollState())
         ) {
-            Image(
-                painter = painterResource(R.drawable.image),
+//            Image(
+//                painter = painterResource(R.drawable.image),
+//                contentDescription = recipe.name,
+//                modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp)
+//            )
+            AsyncImage(
+                model = recipe.imageId,
+                error = painterResource(R.drawable.image),
                 contentDescription = recipe.name,
                 modifier = Modifier.fillMaxWidth().padding(0.dp, 16.dp)
             )
@@ -293,12 +333,9 @@ fun RecipeDetailScreen(
                 modifier = Modifier.padding(0.dp, 16.dp)
             )
             Text(
-                text = recipe.description,
+                text = "Instructions: \n${recipe.instruction}",
                 fontSize = 20.sp,
                 modifier = Modifier.padding(0.dp, 16.dp)
-            )
-            Text(
-                text = "Rating: ${recipe.rating}"
             )
 
         }
@@ -307,7 +344,8 @@ fun RecipeDetailScreen(
 
 @Composable
 fun RestaurantListScreen(
-    foodFilters: List<String>,
+    cuisineFilter: String?,
+    ingredientFilter: String?,
     onRestaurantClick: (Restaurant) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RestaurantListViewModel = viewModel(factory = RestaurantListViewModel.Factory),
@@ -315,8 +353,12 @@ fun RestaurantListScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters }
+    var filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
+        cuisineFilter == null || restaurant.filters.any { it.lowercase() == cuisineFilter}
+    }
+
+    filteredRestaurants = filteredRestaurants.filter { restaurant ->
+        ingredientFilter == null || restaurant.filters.any {it.lowercase() == ingredientFilter}
     }
 
     Scaffold(
@@ -433,13 +475,50 @@ fun RestaurantDetailScreen(
 }
 
 @Composable
+fun ErrorScreen() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(R.drawable.home),
+            contentDescription = "House image",
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(text = "Error loading recipe")
+        Text(text = "Check your internet connection")
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .padding(bottom = 20.dp)
+                .size(60.dp)
+        )
+        Text(
+            text = "Loading...",
+            fontSize = 30.sp,
+        )
+    }
+}
+
+@Composable
 fun HomeScreen(
-    onRecipeListClick: (List<String>) -> Unit,
-    onRestaurantListClick: (List<String>) -> Unit,
+    onRecipeListClick: (String?, String?) -> Unit,
+    onRestaurantListClick: (String?, String?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val selectedFilters by viewModel.selectedFilters.collectAsState()
+    val selectedCuisine by viewModel.selectedCuisine.collectAsState()
+    val selectedIngredient by viewModel.selectedIngredient.collectAsState()
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -452,10 +531,12 @@ fun HomeScreen(
                 .border(1.dp, Color.Black)
                 .padding(12.dp, 20.dp)
         )
+        Text(text = "Choose Cuisine (max 1)")
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(180.dp)
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.size(500.dp, 200.dp)
         ) {
-            items(viewModel.foodFilters) { food ->
+            items(viewModel.cuisineFilters) { cuisine ->
                 Card(
                     modifier = Modifier.padding(8.dp)
                 ) {
@@ -464,11 +545,35 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = food in selectedFilters,
-                            onCheckedChange = { viewModel.selectFilters(food) }
+                            checked = selectedCuisine?.contains(cuisine) == true,
+                            onCheckedChange = { viewModel.selectCuisine(cuisine) }
                         )
                         Text(
-                            text = food
+                            text = cuisine
+                        )
+                    }
+                }
+            }
+        }
+        Text(text = "Choose Ingredient (max 1)")
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.size(500.dp, 200.dp)
+        ) {
+            items(viewModel.ingredientFilters) { ingredient ->
+                Card(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedIngredient?.contains(ingredient) == true,
+                            onCheckedChange = { viewModel.selectIngredient(ingredient) }
+                        )
+                        Text(
+                            text = ingredient
                         )
                     }
                 }
@@ -483,7 +588,7 @@ fun HomeScreen(
         ) {
             Card (
                 modifier = Modifier
-                    .clickable(onClick = { onRestaurantListClick(selectedFilters) })
+                    .clickable(onClick = { onRestaurantListClick(selectedCuisine, selectedIngredient) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -506,7 +611,7 @@ fun HomeScreen(
                 }
             }
             Card (
-                modifier = Modifier.clickable(onClick = { onRecipeListClick(selectedFilters) })
+                modifier = Modifier.clickable(onClick = { onRecipeListClick(selectedCuisine, selectedIngredient) })
                     .padding(8.dp, 0.dp)
                     .weight(1f)
             ) {
@@ -549,14 +654,8 @@ fun HomeScreen(
 //        RestaurantListScreen()
 //    }
 //}
-
 //@Preview(showBackground = true)
 //@Composable
-//fun HomePreview() {
-//    FoodRecommenderTheme {
-//        HomeScreen(
-//            foodFilters = listOf("Asian", "Indian", "Italian", "American", "Chicken", "Pork", "Beef", "Thai", "Vietnamese", "Chinese", "Greek", "Japanese"),
-//            onLocationClick = {}
-//        )
-//    }
+//fun ErrorPreview() {
+//    ErrorScreen()
 //}
