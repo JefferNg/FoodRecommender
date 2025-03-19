@@ -30,7 +30,7 @@ class RestaurantDataSource {
 
     fun loadRestaurants() = restaurantList
 
-    fun getRestaurant(id: Int) : Restaurant? {
+    fun getRestaurant(id: Long) : Restaurant? {
         for (restaurant in restaurantList) {
             if (restaurant.id == id) {
                 return restaurant

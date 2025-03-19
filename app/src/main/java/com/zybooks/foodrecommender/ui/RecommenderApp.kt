@@ -70,12 +70,12 @@ sealed class Routes {
 
     @Serializable
     data class RecipeDetail(
-        val recipeId: Int
+        val recipeId: Long
     )
 
     @Serializable
     data class RestaurantDetail(
-        val restaurantId: Int
+        val restaurantId: Long
     )
 }
 
@@ -111,11 +111,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RecipeDetail> { backstackEntry ->
-            val recipe: Routes.RecipeDetail = backstackEntry.toRoute()
-
+        composable<Routes.RecipeDetail> {
             RecipeDetailScreen(
-                recipeId = recipe.recipeId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -136,11 +133,8 @@ fun RecommenderApp(modifier: Modifier = Modifier) {
                 }
             )
         }
-        composable<Routes.RestaurantDetail> { backstackEntry ->
-            val restaurant: Routes.RestaurantDetail = backstackEntry.toRoute()
-
+        composable<Routes.RestaurantDetail> {
             RestaurantDetailScreen(
-                restaurantId = restaurant.restaurantId,
                 onUpClick = {
                     navController.navigateUp()
                 }
@@ -186,11 +180,13 @@ fun RecipeListScreen(
     foodFilters: List<String>,
     onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RecipeListViewModel = viewModel(),
+    viewModel: RecipeListViewModel = viewModel(factory = RecipeListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val filteredRecipes = viewModel.recipeList.filter { recipe ->
-        foodFilters.isEmpty() || recipe.filters?.any { it.lowercase() in foodFilters } == true
+    val uiState = viewModel.uiState.collectAsState()
+
+    val filteredRecipes = uiState.value.recipeList.filter { recipe ->
+        foodFilters.isEmpty() || recipe.filters.any { it.lowercase() in foodFilters }
     }
 
     Scaffold(
@@ -265,12 +261,13 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeDetailScreen(
-    recipeId: Int,
     modifier: Modifier = Modifier,
-    viewModel: RecipeDetailViewModel = viewModel(),
+    viewModel: RecipeDetailViewModel = viewModel(factory = RecipeDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val recipe = viewModel.getRecipe(recipeId)
+    val uiState = viewModel.uiState.collectAsState()
+
+    val recipe = uiState.value.recipe
 
     Scaffold (
         topBar = {
@@ -313,11 +310,13 @@ fun RestaurantListScreen(
     foodFilters: List<String>,
     onRestaurantClick: (Restaurant) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RestaurantListViewModel = viewModel(),
+    viewModel: RestaurantListViewModel = viewModel(factory = RestaurantListViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val filteredRestaurants = viewModel.restaurantList.filter { restaurant ->
-        foodFilters.isEmpty() || restaurant.filters?.any { it.lowercase() in foodFilters } == true
+    val uiState = viewModel.uiState.collectAsState()
+
+    val filteredRestaurants = uiState.value.restaurantList.filter { restaurant ->
+        foodFilters.isEmpty() || restaurant.filters.any { it.lowercase() in foodFilters }
     }
 
     Scaffold(
@@ -385,12 +384,13 @@ fun RestaurantListScreen(
 
 @Composable
 fun RestaurantDetailScreen(
-    restaurantId: Int,
     modifier: Modifier = Modifier,
-    viewModel: RestaurantDetailViewModel = viewModel(),
+    viewModel: RestaurantDetailViewModel = viewModel(factory = RestaurantDetailViewModel.Factory),
     onUpClick: () -> Unit = { }
 ) {
-    val restaurant = viewModel.getRestaurant(restaurantId)
+    val uiState = viewModel.uiState.collectAsState()
+
+    val restaurant = uiState.value.restaurant
 
     Scaffold (
         topBar = {

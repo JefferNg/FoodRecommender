@@ -1,15 +1,19 @@
 package com.zybooks.foodrecommender.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.net.URI
 
+@Entity
 data class Restaurant (
-    val id: Int = -1,
-    val name: String = "",
-    val rating: Float = 0.0f,
-    val location: String = "",
-    val website: URI ?= null,
-    val phone: String = "tel:",
-    val filters: List<String> ?= null
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0,
+    var name: String = "",
+    var rating: Float = 0.0f,
+    var location: String = "",
+    var website: String ?= null,
+    var phone: String = "tel:",
+    var filters: List<String> = emptyList()
 
 ) {
     override fun equals(other: Any?): Boolean {
@@ -26,7 +30,7 @@ data class Restaurant (
     }
 
     override fun hashCode(): Int {
-        var result = id
+        var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + (filters?.hashCode() ?: 0)
         return result

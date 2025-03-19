@@ -27,7 +27,7 @@ class RecipeDataSource {
 
     fun loadRecipes() = recipeList
 
-    fun getRecipe(id: Int) : Recipe? {
+    fun getRecipe(id: Long) : Recipe? {
         for (recipe in recipeList) {
             if (recipe.id == id) {
                 return recipe
